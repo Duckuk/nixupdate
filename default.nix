@@ -14,5 +14,7 @@ in
       nixupdate = packages.${system}.nixupdate;
     };
 
+    nixosModules.default = {...}: {nixpkgs.overlays = [overlays.default];};
+
     devShells.${system}.default = import ./shell.nix {inherit pkgs;};
   }
