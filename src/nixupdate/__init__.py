@@ -1,3 +1,4 @@
+from subprocess import PIPE
 from pathlib import Path
 from subprocess import run
 import argparse
@@ -95,7 +96,7 @@ def main():
     # Save changes made by user in case we need to exit early
     #
     if has_changed:
-        p = run(["git", "stash", "create"], capture_output=True)
+        p = run(["git", "stash", "create"], stdout=PIPE)
         p.check_returncode()
         stash_commit = p.stdout.decode().strip()
     
