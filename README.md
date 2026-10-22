@@ -8,6 +8,10 @@ A helper tool for updating NixOS configurations. Not to be confused with [nix-up
 - Commits changes to git for every generation built
 - Cleans out old generations to save disk space
 
+# Caveats
+
+Only supports npins-based configurations with a system.nix
+
 # Runtime dependencies
 
 - [alejandra](https://alejandra.kamadorueda.com) >= 4.0.0
