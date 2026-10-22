@@ -4,7 +4,8 @@ A helper tool for updating NixOS configurations. Not to be confused with [nix-up
 
 - Quick update checking
 - Formats with Alejandra
-- Commits changes to git for you for every generation built
+- Builds NixOS configuration
+- Commits changes to git for every generation built
 - Cleans out old generations to save disk space
 
 # Runtime dependencies
@@ -48,7 +49,7 @@ nix run github:Duckuk/nixupdate
 
 # Build
 
-Building with nix is the only build method supported right now:
+Building with nix is the only supported build system:
 
 ```bash
 nix build github:Duckuk/nixupdate
