@@ -49,7 +49,7 @@ nix run github:Duckuk/nixupdate
 
 # Build
 
-Building with nix is the only supported build system:
+Nix is the only supported build system currently:
 
 ```bash
 nix build github:Duckuk/nixupdate
