@@ -32,7 +32,7 @@ nix run github:Duckuk/nixupdate
     Print version and exit.
 
 -n, --no-update
-    Skip updating to newer nixpkgs.
+    Skip updating pins.
 
 -f, --force
     Build configuration even if there are no changes.

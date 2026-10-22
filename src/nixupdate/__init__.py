@@ -67,7 +67,7 @@ def main():
         description="Updates the NixOS system configuration using a system.nix.",
     )
     parser.add_argument("-V", "--version", action="store_true", help="Print version.")
-    parser.add_argument("-n", "--no-update", action="store_true", help="Skip updating to newer nixpkgs.")
+    parser.add_argument("-n", "--no-update", action="store_true", help="Skip updating pins.")
     parser.add_argument("-f", "--force", action="store_true", help="Build configuration even if there are no changes.")
     parser.add_argument("-b", "--boot", action="store_true", help="Switch configuration on next boot instead of immediately.")
     parser.add_argument("-t", "--target", default="/etc/nixos/system.nix", help="The `system.nix` configuration to build. Defaults to `/etc/nixos/system.nix`.")
