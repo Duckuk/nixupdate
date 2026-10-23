@@ -32,7 +32,7 @@ def check_pin(name: str, pin: dict, quick_channel: bool = False) -> tuple[str, s
     
     pin_repo = pin.get("repository", {})
 
-    if pin_repo.get("type") == "GitHub":
+    if pin_type == "Git" and pin_repo.get("type") == "GitHub":
         owner, repo, branch = pin_repo["owner"], pin_repo["repo"], pin["branch"]
 
         req = requests.get(f"https://api.github.com/repos/{owner}/{repo}/branches/{branch}")
