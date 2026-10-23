@@ -2,7 +2,16 @@ import json
 import re
 import requests
 
+import dataclasses
+
 from nixupdate.color_codes import *
+
+@dataclasses.dataclass
+class PinUpdate:
+    pin_type: str
+    name: str
+    old: str
+    new: str
 
 def load_pins() -> dict[str, dict]:
     try:
@@ -13,14 +22,14 @@ def load_pins() -> dict[str, dict]:
         exit(1)
 
 
-def check_pin(name: str, pin: dict, quick_channel: bool = False) -> tuple[str, str, str] | None:
+def check_pin(name: str, pin: dict, quick_channel: bool = False) -> PinUpdate | None:
     """
     Returns a tuple in the format (name, old_revision, new_revision) if the given pin has an update available, otherwise returns None
     Supports GitHub and Channel types
     (pin_name, old_revision, remote_revision)
     """
 
-    PLACEHOLDER = (name, "nil", "nil")
+    PLACEHOLDER = PinUpdate("placeholder", name, "nil", "nil")
 
     if pin.get("frozen") is True:
         return None
@@ -45,8 +54,37 @@ def check_pin(name: str, pin: dict, quick_channel: bool = False) -> tuple[str, s
         new_revision: str = req.json()["commit"]["sha"]
 
         if new_revision != old_revision:
-            return (name, old_revision, new_revision)
+            return PinUpdate(
+                pin_type,
+                name,
+                old_revision,
+                new_revision
+                )
     
+    elif pin_type == "GitRelease" and pin_repo.get("type") == "GitHub":
+        owner, repo, version = pin_repo["owner"], pin_repo["repo"], pin["version"]
+
+        req = requests.get(f"https://api.github.com/repos/{owner}/{repo}/tags")
+
+        if req.headers.get("x-ratelimit-remaining") == "0":
+            print(f"{YELLOW}Warning: github rate limit reached, cannot check for updates.")
+            return None
+        
+        old_version: str = pin["version"]
+        try:
+            new_version: str = req.json()["0"]["name"]
+        except Exception as e:
+            print(f"{YELLOW}Warning: failed getting releases for pin '{name}', cannot check for updates: {e}")
+            return None
+        
+        if new_version != old_version:
+            return PinUpdate(
+                pin_type,
+                name,
+                old_version,
+                new_version
+                )
+
     elif pin_type == "Channel" and quick_channel is False:
         channel: str = pin["name"]
 
@@ -65,7 +103,12 @@ def check_pin(name: str, pin: dict, quick_channel: bool = False) -> tuple[str, s
             )[1]
 
         if new_revision != old_revision:
-            return (name, old_revision, new_revision)
+            return PinUpdate(
+                pin_type,
+                name,
+                old_revision,
+                new_revision
+                )
     
     elif pin_type == "Channel" and quick_channel is True:
         channel: str = pin["name"]
@@ -84,7 +127,7 @@ def check_pin(name: str, pin: dict, quick_channel: bool = False) -> tuple[str, s
     return None
 
 
-def update_check() -> list[tuple[str, str, str]]:
+def update_check() -> list[PinUpdate]:
     """
     Returns a list of pins that need updates
     Supports whatever types check_pin does

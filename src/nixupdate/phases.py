@@ -1,3 +1,4 @@
+from nixupdate.pins import PinUpdate
 import argparse
 import re
 from subprocess import run
@@ -29,7 +30,7 @@ def diff_phase() -> bool:
         print()
         return False
 
-def update_check_phase(args: argparse.Namespace, diff_phase_result: bool) -> list[tuple[str, str, str]] | bool | None:
+def update_check_phase(args: argparse.Namespace, diff_phase_result: bool) -> list[PinUpdate] | bool | None:
     """
     Checks npins pins for updates
     Returns list of pins that require updates if diff_phase_result is False, otherwise returns a boolean
@@ -62,10 +63,15 @@ def update_check_phase(args: argparse.Namespace, diff_phase_result: bool) -> lis
             exit(0)
         
         print(f"No changes, but there may be pins that require updates:")
-        for name, old_revision, new_revision in pins_with_updates:
-            print(f"{YELLOW}{name}{RESET}")
-            print(f"  old revision: {RED}{old_revision}{RESET}")
-            print(f"  new revision: {GREEN}{new_revision}{RESET}")
+        for pin_update in pins_with_updates:
+            print(f"{YELLOW}{pin_update.name}{RESET}")
+
+            if pin_update.pin_type == "GitRelease":
+                print(f"  old version: {RED}{pin_update.old}{RESET}")
+                print(f"  new version: {GREEN}{pin_update.new}{RESET}")
+            else:
+                print(f"  old revision: {RED}{pin_update.old}{RESET}")
+                print(f"  new revision: {GREEN}{pin_update.new}{RESET}")
         
         if not _confirm_choice("Please confirm you would like to proceed (y/n) "):
             print(f"{YELLOW}User aborted. Exiting...{RESET}")
@@ -88,7 +94,7 @@ def update_check_phase(args: argparse.Namespace, diff_phase_result: bool) -> lis
             print()
             return False
 
-def update_phase(updates: list[tuple[str, str, str]] | bool):
+def update_phase(updates: list[PinUpdate] | bool):
     """
     Runs npins update
     Exits early if npins fails
@@ -97,7 +103,7 @@ def update_phase(updates: list[tuple[str, str, str]] | bool):
     if isinstance(updates, bool): 
         run(["npins", "update"]).check_returncode()
     else:
-        pin_names = [e[0] for e in updates]
+        pin_names = [e.name for e in updates]
         run(["npins", "update"] + pin_names).check_returncode()
     print(f"{GREEN}Finished updating npins!{RESET}")
     print()
