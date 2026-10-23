@@ -67,14 +67,14 @@ def check_pin(name: str, pin: dict, quick_channel: bool = False) -> PinUpdate | 
         req = requests.get(f"https://api.github.com/repos/{owner}/{repo}/tags")
 
         if req.headers.get("x-ratelimit-remaining") == "0":
-            print(f"{YELLOW}Warning: github rate limit reached, cannot check for updates.")
+            print(f"{YELLOW}Warning: github rate limit reached, cannot check for updates.{RESET}")
             return None
         
         old_version: str = pin["version"]
         try:
             new_version: str = req.json()[0]["name"]
         except Exception as e:
-            print(f"{YELLOW}Warning: failed getting releases for pin '{name}', cannot check for updates: {e}")
+            print(f"{YELLOW}Warning: failed getting releases for pin '{name}', cannot check for updates: {e}{RESET}")
             return None
         
         if new_version != old_version:
