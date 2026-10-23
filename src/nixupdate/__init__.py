@@ -12,18 +12,6 @@ import nixupdate.phases as phases
 
 stash_commit: str | None = None
 
-def exit_handler() -> None:
-    if stash_commit is not None:
-        try:
-            run(["git", "checkout", "--quiet", "."]).check_returncode()
-            run(["git", "clean", "--quiet", "--force", "-d"]).check_returncode()
-            run(["git", "stash", "apply", "--quiet", stash_commit]).check_returncode()
-            print("Restored repo original state.")
-        except Exception as e:
-            print(f"{RED}Error: Failed to restore repo original state: {e}{RESET}")
-            print(f"Your changes are stored in commit object '{YELLOW}{stash_commit}{RESET}'. Use something like `{YELLOW}git stash apply {stash_commit}{RESET}` to get your changes back.")
-
-
 def sanity_check(args) -> None:
     if args.commit_message == "":
         print(f"{RED}Error: Commit message cannot be empty!{RESET}")
@@ -93,19 +81,6 @@ def main():
     has_changed = phases.diff_phase()
 
     #
-    # Save changes made by user in case we need to exit early
-    #
-    if has_changed:
-        p = run(["git", "stash", "create"], stdout=PIPE)
-        p.check_returncode()
-        stash_commit = p.stdout.decode().strip()
-    
-    #
-    # Register the exit handler so we can reverse any changes we make
-    #
-    atexit.register(exit_handler)
-
-    #
     # Check for nixpkgs update
     #
     updates = phases.update_check_phase(args, has_changed)
@@ -125,8 +100,6 @@ def main():
     # Build the configuration
     #
     phases.build_phase(args)
-
-    atexit.unregister(exit_handler)
 
     #
     # Push changes to git
